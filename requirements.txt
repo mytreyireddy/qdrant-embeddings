@@ -1,0 +1,4 @@
+snowflake-connector-python
+qdrant-client
+pandas
+ray
