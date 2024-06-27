@@ -1,0 +1,41 @@
+version: '3.7'
+
+services:
+  qdrant:
+    container_name: qdrant
+    image: qdrant/qdrant:v1.9.0
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - ./data/qdrant_storage:/qdrant/storage
+
+  qdrant-embeddings:
+    container_name: qdrant-embeddings
+    build:
+      context: .
+      dockerfile: DockerFile
+    depends_on:
+      - qdrant
+    environment:
+      - SNOWFLAKE_HOST=localhost
+      - SNOWFLAKE_PORT=10017
+      - SNOWFLAKE_USER=sdm
+      - SNOWFLAKE_PASSWORD=sdm
+      - SNOWFLAKE_ACCOUNT=zefr
+      - SNOWFLAKE_PROTOCOL=http
+      - SNOWFLAKE_WAREHOUSE=ENGINEER_WH
+      - SNOWFLAKE_DATABASE=prod
+      - SNOWFLAKE_SCHEMA=measurement
+      - SNOWFLAKE_TABLE=meta_embeddings
+      - QDRANT_HOST=qdrant
+      - QDRANT_PORT=6333
+      - QDRANT_COLLECTION_NAME=embeddings_index
+    ports:
+      - "8000:8000"
+    networks:
+      - qdrant_network
+
+networks:
+  qdrant_network:
+    driver: bridge
